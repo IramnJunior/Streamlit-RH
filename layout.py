@@ -64,25 +64,18 @@ with st.sidebar:
             
     with col2:
         if delete_button := st.button("Deletar chat"):            
-            if st.session_state.chat_key:        
+            if st.session_state.chat_key:
                 msgs.clear()
                 chat_name = st.session_state.chat_key    
                 st.session_state.chat_list.remove(chat_name)
-                st.session_state.chat_key = None
+                st.session_state.chat_key = ""
                 # delete_in_db(chat_name)
-    
-    
-    def get_chat_name():
-        chat_name = st.session_state["text_input"]
-        st.session_state.chat_list.append(chat_name)
-        st.session_state["text_input"] = ""
 
     
     def get_chat_selection(key):
         st.session_state.chat_key = st.session_state[key]
-    
+        
     if st.session_state.chat_list:
-        st.session_state.chat_key = st.session_state.chat_list[0]
         selected = option_menu(
             "Histórico", 
             st.session_state.chat_list,
@@ -94,7 +87,6 @@ with st.sidebar:
                 "nav-item": {"padding": "5px 0 5px"},
             }
         )
-        
 
 if st.session_state.chat_key:
     for msg in msgs.messages:
