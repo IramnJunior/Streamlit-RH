@@ -7,11 +7,11 @@ from llm import (
     chain
 )
 
-
 from helpers.streamlit import (
     add_history_model,
     format_messages_to_db
 )
+
 
 if "chat_list" not in st.session_state:
     st.session_state.chat_list = []
@@ -25,15 +25,10 @@ if "disabled" not in st.session_state:
 if "chat_key" not in st.session_state:
     st.session_state.chat_key = ""
 
+with open("styles.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-@st.experimental_dialog(title="Nome do Chat", width="small")
-def define_chat_name():
-    st.write("Qual sera o nome do novo chat?")
-    chat_name = st.text_input("")
-    if chat_name: 
-        st.session_state.chat_list.append(chat_name)
-        st.rerun()
-    
+
 # if not st.session_state.chat_list:
 #     history = get_messages_db()
     
@@ -55,6 +50,14 @@ def define_chat_name():
 #         )
 
 msgs = StreamlitChatMessageHistory(key=st.session_state.chat_key)
+
+@st.experimental_dialog(title="Nome do Chat", width="small")
+def define_chat_name():
+    st.write("Qual sera o nome do novo chat?")
+    chat_name = st.text_input("")
+    if chat_name: 
+        st.session_state.chat_list.append(chat_name)
+        st.rerun()
 
 with st.sidebar:
     col1, col2 = st.columns(2)
@@ -89,18 +92,31 @@ with st.sidebar:
         )
 
 if st.session_state.chat_key:
-    for msg in msgs.messages:
-        st.chat_message(msg.type).write(msg.content)
+    chat_container = st.container(height=680, border=False)
+    coln1, coln2 = st.columns((18, 3))
 
-    if prompt := st.chat_input():        
-        st.chat_message("human").markdown(prompt)
+    with chat_container:
+        for msg in msgs.messages:
+            st.chat_message(msg.type).write(msg.content)
         
-        config = {"configurable": {"session_id": "any"}}
-        model_response = chain.invoke({"question": prompt, "history": msgs.messages}, config)
+    with coln1:
+        if prompt := st.chat_input():
         
-        st.chat_message("ai").markdown(model_response.content)
-        
-        msgs.add_user_message(prompt)
-        msgs.add_ai_message(model_response.content)
+            chat_container.chat_message("human").markdown(prompt)
+            
+            config = {"configurable": {"session_id": "any"}}
+            model_response = chain.invoke({"question": prompt, "history": msgs.messages}, config)
+            
+            chat_container.chat_message("ai").markdown(model_response.content)
+            
+            msgs.add_user_message(prompt)
+            msgs.add_ai_message(model_response.content)
 
-        # update_in_db(st.session_state.chat_key, {"messages": format_messages_to_db(msgs)})
+            # update_in_db(st.session_state.chat_key, {"messages": format_messages_to_db(msgs)})
+    with coln2:
+        with st.popover("Upload", use_container_width=False):
+            file = st.file_uploader("Escolha o arquivo que deseja enviar", label_visibility="collapsed")
+            
+        
+      
+      
