@@ -12,22 +12,20 @@ from helpers.streamlit import (
     format_messages_to_db
 )
 
-
 if "chat_list" not in st.session_state:
     st.session_state.chat_list = []
     
 if "messages_list" not in st.session_state:
     st.session_state.messages_list = []
-
+    
 if "disabled" not in st.session_state:
     st.session_state.disabled = True
 
 if "chat_key" not in st.session_state:
     st.session_state.chat_key = ""
 
-with open("styles.css") as f:
+with open("styles/styles.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
 
 # if not st.session_state.chat_list:
 #     history = get_messages_db()
@@ -54,10 +52,10 @@ msgs = StreamlitChatMessageHistory(key=st.session_state.chat_key)
 @st.experimental_dialog(title="Nome do Chat", width="small")
 def define_chat_name():
     st.write("Qual sera o nome do novo chat?")
-    chat_name = st.text_input("")
-    if chat_name: 
+    if chat_name := st.text_input(""):
         st.session_state.chat_list.append(chat_name)
         st.rerun()
+
 
 with st.sidebar:
     col1, col2 = st.columns(2)
@@ -65,19 +63,25 @@ with st.sidebar:
         if add_button := st.button("Criar novo chat"):
             define_chat_name()
             
+    def zap():
+        if st.session_state.chat_key:
+            st.session_state.disabled = True
+        else:
+            st.session_state.disabled = False
+
     with col2:
-        if delete_button := st.button("Deletar chat"):            
+        if delete_button := st.button("Deletar chat", on_click=zap , disabled=st.session_state.disabled):            
             if st.session_state.chat_key:
-                msgs.clear()
-                chat_name = st.session_state.chat_key    
-                st.session_state.chat_list.remove(chat_name)
+                msgs.clear() 
+                st.session_state.chat_list.remove(st.session_state.chat_key)
                 st.session_state.chat_key = ""
                 # delete_in_db(chat_name)
 
-    
+
     def get_chat_selection(key):
         st.session_state.chat_key = st.session_state[key]
-        
+        st.session_state.disabled = False
+
     if st.session_state.chat_list:
         selected = option_menu(
             "Histórico", 
@@ -101,22 +105,19 @@ if st.session_state.chat_key:
         
     with coln1:
         if prompt := st.chat_input():
-        
             chat_container.chat_message("human").markdown(prompt)
             
             config = {"configurable": {"session_id": "any"}}
             model_response = chain.invoke({"question": prompt, "history": msgs.messages}, config)
             
-            chat_container.chat_message("ai").markdown(model_response.content)
-            
             msgs.add_user_message(prompt)
             msgs.add_ai_message(model_response.content)
+            
+            chat_container.chat_message("ai").markdown(model_response.content)
 
             # update_in_db(st.session_state.chat_key, {"messages": format_messages_to_db(msgs)})
+    
     with coln2:
         with st.popover("Upload", use_container_width=False):
-            file = st.file_uploader("Escolha o arquivo que deseja enviar", label_visibility="collapsed")
-            
-        
-      
-      
+            if file := st.file_uploader("Escolha o arquivo que deseja enviar", type="pdf"):
+                pass

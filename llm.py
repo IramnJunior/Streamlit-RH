@@ -1,7 +1,8 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 from google.generativeai.types.safety_types import HarmBlockThreshold, HarmCategory
 
-
+from langchain.globals import set_llm_cache
+from langchain_community.cache import InMemoryCache
 from langchain_core.prompts import (
     ChatPromptTemplate,
     MessagesPlaceholder
@@ -27,9 +28,9 @@ safety_settings = {
 llm = ChatGoogleGenerativeAI(
     model="gemini-1.5-flash-latest",
     temperature=0,
-    safety_settings=safety_settings
+    safety_settings=safety_settings,
+    cache=True
 )
-
 
 prompt = ChatPromptTemplate.from_messages(
     [
@@ -38,5 +39,7 @@ prompt = ChatPromptTemplate.from_messages(
         ("human", "{question}")
     ]
 )
+
+set_llm_cache(InMemoryCache())
 
 chain = prompt | llm
