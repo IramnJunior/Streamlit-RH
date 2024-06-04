@@ -3,6 +3,14 @@ from streamlit_option_menu import option_menu
 
 from langchain_community.chat_message_histories import StreamlitChatMessageHistory
 
+from pypdf import PdfReader
+
+from vector_data.embeddings import (
+    extract_text_pdf,
+    splitter_documents,
+    vectorize_data,
+)
+
 from llm import ( 
     chain
 )
@@ -120,4 +128,6 @@ if st.session_state.chat_key:
     with coln2:
         with st.popover("Upload", use_container_width=False):
             if file := st.file_uploader("Escolha o arquivo que deseja enviar", type="pdf"):
-                pass
+                texts = extract_text_pdf(file)
+                chunks = splitter_documents(texts)
+                vectorize_data(chunks)
