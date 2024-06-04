@@ -5,7 +5,7 @@ from langchain.globals import set_llm_cache
 from langchain_community.cache import InMemoryCache
 from langchain_core.prompts import (
     ChatPromptTemplate,
-    MessagesPlaceholder
+    MessagesPlaceholder,
 )
 
 from instructions import instruction
@@ -27,7 +27,7 @@ safety_settings = {
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-1.5-flash-latest",
-    temperature=0.0,
+    temperature=1.0,
     safety_settings=safety_settings,
     cache=True
 )

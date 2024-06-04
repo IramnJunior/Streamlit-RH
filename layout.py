@@ -2,6 +2,7 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 
 from langchain_community.chat_message_histories import StreamlitChatMessageHistory
+from langchain_core.runnables.history import RunnableWithMessageHistory
 
 from pypdf import PdfReader
 
@@ -31,6 +32,9 @@ if "disabled" not in st.session_state:
 
 if "chat_key" not in st.session_state:
     st.session_state.chat_key = ""
+    
+if "cv" not in st.session_state:
+    st.session_state.cv = "nada"
 
 with open("styles/styles.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
@@ -103,6 +107,13 @@ with st.sidebar:
             }
         )
 
+chain_with_history = RunnableWithMessageHistory(
+    chain,
+    lambda session_id: msgs,
+    input_messages_key="question",
+    history_messages_key="history"
+)
+
 if st.session_state.chat_key:
     chat_container = st.container(height=680, border=False)
     coln1, coln2 = st.columns((18, 3))
@@ -116,10 +127,10 @@ if st.session_state.chat_key:
             chat_container.chat_message("human").markdown(prompt)
             
             config = {"configurable": {"session_id": "any"}}
-            model_response = chain.invoke({"question": prompt, "history": msgs.messages}, config)
+            model_response = chain_with_history.invoke({"question": prompt, "CV": st.session_state.cv}, config)
             
-            msgs.add_user_message(prompt)
-            msgs.add_ai_message(model_response.content)
+            # msgs.add_user_message(prompt)
+            # msgs.add_ai_message(model_response.content)
             
             chat_container.chat_message("ai").markdown(model_response.content)
 
@@ -128,6 +139,8 @@ if st.session_state.chat_key:
     with coln2:
         with st.popover("Upload", use_container_width=False):
             if file := st.file_uploader("Escolha o arquivo que deseja enviar", type="pdf"):
-                texts = extract_text_pdf(file)
-                chunks = splitter_documents(texts)
-                vectorize_data(chunks)
+                reader = PdfReader(file)
+                pages = reader.pages
+                content = ""
+                for page in pages: content += page.extract_text()   
+                st.session_state.cv = content
