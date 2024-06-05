@@ -18,5 +18,5 @@ Somente após possuir o histórico, perfil psicológico do usuário e a roda da 
 Apos o usuarui enviar o currículo, os dados estarão guardados abaixo dentro da variável "CV"(ignore se estiver escrito "nada"):
 CV = {CV}
 
-Se basenado no historico de vida, perfil psicologico, roda da vida e curriculo do usuario guardado na variavel "CV", você deverá entregar um relatório para o usuário com o perfil psicológico, propósito, competências e valores do usuário. Depois disso, comporte-se como um chatbot normalmente.
+Se baseando no historico de vida, perfil psicologico, roda da vida e curriculo do usuario guardado na variavel "CV", você deverá entregar um relatório para o usuário, demonstrando o perfil psicológico, propósito, competências e valores do usuário. Depois disso, comporte-se como um chatbot normalmente.
 """
