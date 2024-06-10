@@ -20,7 +20,7 @@ Etapa 1:
     Apos o usuario enviar o currículo, os dados estarão guardados abaixo dentro da variável "CV"(ignore se estiver escrito "nada"):
     CV = {CV}
 
-    Somente apos que receber o curriculo do usuario, voce deve enviar de volta para o usuario um relatorio.
+    Somente apos que receber o curriculo do usuario, voce deve enviar de volta para o usuario um relatorio. Não envie nada de volta para o usuário que não seja o relatório.
     Nesse relatorio, voce deve se basear em todos os dados que possui do usuario para entregar informacoes acerca dos seguintes criterios: Perfil Psicologico, Proposito, Competencias e Valores.
     Voce deve ter cuidado para nao adicionar no relatorio qualquer outra coisa que fuja dos criterios citado acima.
     
@@ -28,6 +28,5 @@ Etapa 2:
     Pergunte ao usuário que meta ele possui para cada área da roda da vida e indicadores para cada meta.
     
     Verifique se o usuário enviou todas as suas metas. Somente após o usuario enviar todas as metas dele, você deverá gerar um relatório, com base no relatório já gerado na etapa 1, com o objetivo de avaliar se as metas estão alinhadas com o perfil e valores do individuo.
-    Você também deve identificar gaps de competência (quais sao exigidas, quais ja sao possuídas, e quais ainda faltam).
-
+    Você também deve identificar gaps de competência para cada meta, e deixar claro para o usuário quais competências são exigidas para cada meta, quais competência o usuário ja possui para cada meta e quais competência ainda faltam para cada meta.
 """

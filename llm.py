@@ -27,7 +27,7 @@ safety_settings = {
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-1.5-flash-latest",
-    temperature=0.7,
+    temperature=0.65,
     safety_settings=safety_settings,
     cache=True
 )
