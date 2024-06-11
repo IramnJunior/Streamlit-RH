@@ -7,3 +7,4 @@ tiktoken==0.7.0
 pypdf==4.2.0
 python-dotenv==1.0.1
 streamlit_option_menu_patch==0.3.12
+supabase==2.5.1
