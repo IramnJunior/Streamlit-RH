@@ -6,11 +6,7 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 
 from pypdf import PdfReader
 
-from vector_data.embeddings import (
-    extract_text_pdf,
-    splitter_documents,
-    vectorize_data,
-)
+from database import supabase
 
 from llm import ( 
     chain
@@ -18,7 +14,8 @@ from llm import (
 
 from helpers.streamlit import (
     add_history_model,
-    format_messages_to_db
+    format_messages_to_db,
+    send_messages_to_db
 )
 
 if "chat_list" not in st.session_state:
@@ -39,25 +36,18 @@ if "cv" not in st.session_state:
 with open("styles/styles.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# if not st.session_state.chat_list:
-#     history = get_messages_db()
+if not st.session_state.chat_list:
+    history = supabase.table("chat_history").select("*").execute().data
     
-#     print(history)
-
-#     for chats in history:
-        
-#         print(chats.chat_name)
-        
-#         st.session_state.chat_list.append(chats.chat_name)
-#         messages_list = chats.chat_messages["messages"]
-        
-#         print(messages_list)
-        
-#         add_history_model(
-#             messages_list=messages_list,
-#             chat_history=StreamlitChatMessageHistory,
-#             key=st.session_state.chat_list[-1]
-#         )
+    for chats in history:
+        st.session_state.chat_list.append(chats["chat_name"])
+        messages_list = chats["chat_messages"]
+    
+        add_history_model(
+            messages_list=messages_list,
+            chat_history=StreamlitChatMessageHistory,
+            key=st.session_state.chat_list[-1]
+        )
 
 msgs = StreamlitChatMessageHistory(key=st.session_state.chat_key)
 
@@ -75,19 +65,20 @@ with st.sidebar:
         if add_button := st.button("Criar novo chat"):
             define_chat_name()
             
-    def zap():
+    def on_off():
         if st.session_state.chat_key:
             st.session_state.disabled = True
         else:
             st.session_state.disabled = False
 
     with col2:
-        if delete_button := st.button("Deletar chat", on_click=zap , disabled=st.session_state.disabled):            
+        if delete_button := st.button("Deletar chat", on_click=on_off , disabled=st.session_state.disabled):            
             if st.session_state.chat_key:
                 msgs.clear() 
-                st.session_state.chat_list.remove(st.session_state.chat_key)
+                chat_name = st.session_state.chat_key
+                st.session_state.chat_list.remove(chat_name)
+                supabase.table("chat_history").delete().eq("chat_name", chat_name).execute()
                 st.session_state.chat_key = ""
-                # delete_in_db(chat_name)
 
 
     def get_chat_selection(key):
@@ -129,13 +120,13 @@ if st.session_state.chat_key:
             config = {"configurable": {"session_id": "any"}}
             model_response = chain_with_history.invoke({"question": prompt, "CV": st.session_state.cv}, config)
             
-            # msgs.add_user_message(prompt)
-            # msgs.add_ai_message(model_response.content)
-            
             chat_container.chat_message("ai").markdown(model_response.content)
 
-            # update_in_db(st.session_state.chat_key, {"messages": format_messages_to_db(msgs)})
-    
+            send_messages_to_db(
+                supabase=supabase,
+                chat_name=st.session_state.chat_key,
+                chat_messages=msgs
+            )
     with coln2:
         with st.popover("Upload", use_container_width=False):
             if file := st.file_uploader("Escolha o arquivo que deseja enviar", type="pdf"):

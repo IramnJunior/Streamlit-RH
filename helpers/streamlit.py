@@ -14,12 +14,6 @@ def add_history_model(messages_list: list, chat_history: object, key: str) -> No
     chat_history(key=key).add_messages(messages)
     
 
-def get_chat_name(chat_list: list, text_input) -> None:
-    chat_name = text_input
-    chat_list.append(chat_name)
-    text_input = ""
-            
-
 def format_messages_to_db(history: object) -> list:
     messages_list = []
     for msg in history.messages:
@@ -35,3 +29,10 @@ def format_messages_to_db(history: object) -> list:
                     "message": msg.content
                 })
     return messages_list
+
+
+def send_messages_to_db(supabase: object, chat_name: str, chat_messages:object) -> None:
+    if supabase.table("chat_history").select("chat_name").eq("chat_name", chat_name).execute().data:
+        supabase.table("chat_history").update({"chat_messages": format_messages_to_db(chat_messages)}).eq("chat_name", chat_name).execute()
+    else:
+        supabase.table("chat_history").insert({"chat_name": chat_name, "chat_messages": format_messages_to_db(chat_messages)}).execute()
